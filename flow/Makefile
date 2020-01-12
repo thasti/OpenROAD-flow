@@ -35,7 +35,8 @@
 
 
 # Default design
-DESIGN_CONFIG ?= ./designs/nangate45/gcd.mk
+DESIGN_CONFIG ?= ./opdb/opdb.mk
+# DESIGN_CONFIG ?= ./designs/nangate45/gcd.mk
 
 # # Global override Floorplan
 # CORE_UTILIZATION := 30
@@ -233,7 +234,7 @@ endif
 # STEP 5: PDN generation
 #-------------------------------------------------------------------------------
 $(RESULTS_DIR)/2_5_floorplan_pdn.def: $(RESULTS_DIR)/2_4_floorplan_macro.def
-ifneq ($(PDN_CFG),)
+ifeq ($(PDN_CFG),)
 	openroad $(SCRIPTS_DIR)/pdn.tcl | tee $(LOG_DIR)/2_5_pdn.log
 	@! grep --color "Error:" $(LOG_DIR)/2_5_pdn.log
 else
@@ -500,7 +501,7 @@ print_drc:
 
 # run test using gnu parallel
 #-------------------------------------------------------------------------------
-TEST_SCRIPT ?= $(TEST_DIR)/core_tests.sh
+TEST_SCRIPT ?= $(TEST_DIR)/run_opdb.sh
 run_test:
 	parallel --sshloginfile $(TEST_DIR)/nodes.txt \
 	         --timeout 21600 \
