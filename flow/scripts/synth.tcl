@@ -44,6 +44,13 @@ if {[info exist ::env(CLKGATE_MAP_FILE)]} {
   read_verilog $::env(CLKGATE_MAP_FILE)
 }
 
+if {[file exist $::env(RESULTS_DIR)/mem_map.v]} {
+  prep -top $::env(DESIGN_NAME) -flatten
+  memory_unpack
+  memory -nomap
+  techmap -map $::env(RESULTS_DIR)/mem_map.v
+}
+
 # Use hierarchy to automatically generate blackboxes for known memory macro.
 # Pins are enumerated for proper mapping
 if {[info exist ::env(BLACKBOX_MAP_TCL)]} {

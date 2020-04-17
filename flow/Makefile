@@ -13,7 +13,7 @@
 # DESIGN_CONFIG=./designs/nangate45/jpeg.mk
 # DESIGN_CONFIG=./designs/nangate45/swerv.mk
 # DESIGN_CONFIG=./designs/nangate45/swerv_wrapper.mk
-# DESIGN_CONFIG=./designs/nangate45/tinyRocket.mk
+DESIGN_CONFIG=./designs/nangate45/tinyRocket.mk
 
 # DESIGN_CONFIG=./designs/tsmc65lp/aes.mk
 # DESIGN_CONFIG=./designs/tsmc65lp/ariane.mk
@@ -142,6 +142,24 @@ synth: versions.txt \
        $(RESULTS_DIR)/1_synth.sdc
 # ==============================================================================
 
+ifneq ($(GENERATE_MEMORY),)
+BSG_RESULTS_DIR = ../../alpha-release/bsg_fakeram/results
+$(RESULTS_DIR)/mem.json:
+	mkdir -p $(RESULTS_DIR) $(LOG_DIR) $(REPORTS_DIR)
+	($(TIME_CMD) yosys -c $(SCRIPTS_DIR)/mem_dump.tcl) 2>&1 | tee $(LOG_DIR)/1_0_mem.log
+
+$(RESULTS_DIR)/mem_map.v: $(RESULTS_DIR)/mem.json
+	$(UTILS_DIR)/genMems.py --memJson $(RESULTS_DIR)/mem.json \
+	                        --memMap $@ \
+	                        --bsgResultsDir $(BSG_RESULTS_DIR)
+
+mem_map: $(RESULTS_DIR)/mem_map.v
+$(RESULTS_DIR)/1_1_yosys.v: $(RESULTS_DIR)/mem_map.v
+
+export ADDITIONAL_LEFS += $(shell find $(BSG_RESULTS_DIR) -iname "*.lef")
+export ADDITIONAL_LIBS += $(shell find $(BSG_RESULTS_DIR) -iname "*.lib")
+
+endif
 
 # Run Synthesis using yosys
 #-------------------------------------------------------------------------------

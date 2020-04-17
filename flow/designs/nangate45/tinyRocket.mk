@@ -7,12 +7,13 @@ export VERILOG_FILES = ./designs/src/tinyRocket/AsyncResetReg.v \
                        ./designs/src/tinyRocket/ClockDivider3.v \
                        ./designs/src/tinyRocket/plusarg_reader.v \
                        ./designs/src/tinyRocket/freechips.rocketchip.system.TinyConfig.v \
-                       ./designs/src/tinyRocket/freechips.rocketchip.system.TinyConfig.nangate45.v
+                       ./designs/src/tinyRocket/freechips.rocketchip.system.TinyConfig.behav_srams.v
 
 export SDC_FILE      = ./designs/src/tinyRocket/RocketTile.sdc
 
-export ADDITIONAL_LEFS = $(wildcard ./designs/src/tinyRocket/fakeram45*.lef)
-export ADDITIONAL_LIBS = $(wildcard ./designs/src/tinyRocket/fakeram45*.lib)
+GENERATE_MEMORY = 1
+# export ADDITIONAL_LEFS = $(wildcard ./designs/src/tinyRocket/fakeram45*.lef)
+# export ADDITIONAL_LIBS = $(wildcard ./designs/src/tinyRocket/fakeram45*.lib)
 
 
 # These values must be multiples of placement site
