@@ -8,6 +8,9 @@ export MERGED_LEF = ./platforms/nangate45/NangateOpenCellLibrary.mod.lef
 export LIB_FILES  = ./platforms/nangate45/NangateOpenCellLibrary_typical.lib
 export GDS_FILES  = $(wildcard ./platforms/nangate45/gds/*)
 
+# Infer memory with the make mem_map target
+GENERATE_MEMORY = 1
+
 # Automatically pick a reasonable area and utilization
 
 # Core utilization in %
