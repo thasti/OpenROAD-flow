@@ -13,4 +13,7 @@ COPY --from=openroad/yosys /build ./tools/build/yosys
 COPY --from=openroad/tritonroute /build ./tools/build/TritonRoute
 COPY ./setup_env.sh .
 COPY ./flow ./flow
+
+RUN mkdir /alpha-release && cd /alpha-release && git clone https://github.com/bespoke-silicon-group/bsg_fakeram.git && cd bsg_fakeram && make tools
+RUN chmod o+rw -R /alpha-release
 RUN chmod o+rw -R /OpenROAD-flow/flow

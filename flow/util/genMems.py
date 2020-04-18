@@ -44,10 +44,14 @@ fakeramCfg = {"tech_nm": 45,
 for module in memJson["modules"]:
   for memInst in memJson["modules"][module]["cells"]:
     # Set localvars:
-    rd_ports = memJson["modules"][module]["cells"][memInst]["parameters"]["RD_PORTS"]
-    wr_ports = memJson["modules"][module]["cells"][memInst]["parameters"]["WR_PORTS"]
-    width = memJson["modules"][module]["cells"][memInst]["parameters"]["WIDTH"]
-    depth = memJson["modules"][module]["cells"][memInst]["parameters"]["SIZE"]
+    rd_ports = int(memJson["modules"][module]["cells"]
+                    [memInst]["parameters"]["RD_PORTS"], 2)
+    wr_ports = int(memJson["modules"][module]["cells"]
+                    [memInst]["parameters"]["WR_PORTS"], 2)
+    width = int(memJson["modules"][module]["cells"]
+                [memInst]["parameters"]["WIDTH"], 2)
+    depth = int(memJson["modules"][module]["cells"]
+                [memInst]["parameters"]["SIZE"], 2)
 
     # if exist in cache do nothing
     # TODO
