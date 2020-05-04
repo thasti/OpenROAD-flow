@@ -91,17 +91,7 @@ if fakeramCfg["srams"]:
   with open(fakeramCfgFile, "w") as resultSpecfile:
     json.dump(fakeramCfg, resultSpecfile, indent=2)
 
-  make_proc = subprocess.Popen(["make", "CONFIG=" + os.path.abspath(fakeramCfgFile)],
-                               stdout=subprocess.PIPE, cwd=os.path.dirname(args.bsgResultsDir))
-  stdout, stderr = make_proc.communicate()
-
-  # Debug
-  # print("stdout: {}".format(stdout))
-  # print("stderr: {}".format(stderr))
-  # print("Return code: {}".format(make_proc.returncode))
-
-  if make_proc.returncode:
-    sys.exit("ERROR running bsg_fakeram")
+  make_proc = subprocess.check_call(["make", "CONFIG=" + os.path.abspath(fakeramCfgFile)], cwd=os.path.dirname(args.bsgResultsDir))
 else:
   print "No memory macros to generate"
 
