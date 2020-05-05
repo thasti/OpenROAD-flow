@@ -41,7 +41,7 @@
 
 # DESIGN_CONFIG=./designs/gf14/bsg_padring.mk
 # DESIGN_CONFIG=./designs/gf14/bsg_loopback.mk
-# DESIGN_CONFIG=./designs/gf14/bp_single.mk
+DESIGN_CONFIG=./designs/gf14/bp_single.mk
 # DESIGN_CONFIG=./designs/gf14/bp_dual.mk
 # DESIGN_CONFIG=./designs/gf14/bp_quad.mk
 
@@ -49,7 +49,7 @@
 
 
 # Default design
-DESIGN_CONFIG ?= ./designs/nangate45/gcd.mk
+# DESIGN_CONFIG ?= ./designs/nangate45/gcd.mk
 
 # # Global override Floorplan
 # export CORE_UTILIZATION := 30
@@ -57,6 +57,17 @@ DESIGN_CONFIG ?= ./designs/nangate45/gcd.mk
 # export CORE_MARGIN := 4
 
 default: finish
+
+export REPLACE_TARGET_RC_METRIC ?= 1.04
+export FR_23 ?= 0.5
+export FR_OTHER ?= 0.2
+
+export REPLACE_PAD ?= 1
+export REPLACE_K1 ?= 1
+export REPLACE_K2 ?= 1
+export REPLACE_K3 ?= 0
+
+export DISABLE_ROUTABILITY=0
 
 # ==============================================================================
 #  ____  _____ _____ _   _ ____

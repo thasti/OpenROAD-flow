@@ -35,8 +35,8 @@ proc find_macros {} {
 }
 
 if {[find_macros] != ""} {
-    set_wire_rc -layer $::env(WIRE_RC_LAYER)
-    global_placement -timing_driven -density $::env(PLACE_DENSITY)
+    # set_wire_rc -layer $::env(WIRE_RC_LAYER)
+    global_placement -density $::env(PLACE_DENSITY) -disable_routability_driven
 } else {
     puts "No macros found: Skipping global_placement"
 }
