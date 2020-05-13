@@ -44,14 +44,10 @@ fakeramCfg = {"tech_nm": 45,
 for module in memJson["modules"]:
   for memInst in memJson["modules"][module]["cells"]:
     # Set localvars:
-    rd_ports = int(memJson["modules"][module]["cells"]
-                    [memInst]["parameters"]["RD_PORTS"], 2)
-    wr_ports = int(memJson["modules"][module]["cells"]
-                    [memInst]["parameters"]["WR_PORTS"], 2)
-    width = int(memJson["modules"][module]["cells"]
-                [memInst]["parameters"]["WIDTH"], 2)
-    depth = int(memJson["modules"][module]["cells"]
-                [memInst]["parameters"]["SIZE"], 2)
+    rd_ports = memJson["modules"][module]["cells"][memInst]["parameters"]["RD_PORTS"]
+    wr_ports = memJson["modules"][module]["cells"][memInst]["parameters"]["WR_PORTS"]
+    width = memJson["modules"][module]["cells"][memInst]["parameters"]["WIDTH"]
+    depth = memJson["modules"][module]["cells"][memInst]["parameters"]["SIZE"]
 
     # if exist in cache do nothing
     # TODO
@@ -95,17 +91,7 @@ if fakeramCfg["srams"]:
   with open(fakeramCfgFile, "w") as resultSpecfile:
     json.dump(fakeramCfg, resultSpecfile, indent=2)
 
-  make_proc = subprocess.Popen(["make", "CONFIG=" + os.path.abspath(fakeramCfgFile)],
-                               stdout=subprocess.PIPE, cwd=os.path.dirname(args.bsgResultsDir))
-  stdout, stderr = make_proc.communicate()
-
-  # Debug
-  # print("stdout: {}".format(stdout))
-  # print("stderr: {}".format(stderr))
-  # print("Return code: {}".format(make_proc.returncode))
-
-  if make_proc.returncode:
-    sys.exit("ERROR running bsg_fakeram")
+  make_proc = subprocess.check_call(["make", "CONFIG=" + os.path.abspath(fakeramCfgFile)], cwd=os.path.dirname(args.bsgResultsDir))
 else:
   print "No memory macros to generate"
 
