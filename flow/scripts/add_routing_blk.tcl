@@ -19,28 +19,40 @@ set cnt 0
 foreach inst $allInsts {
   set master [$inst getMaster]
   set name [$master getName]
-  set loc_llx [lindex [$inst getLocation] 0]
-  set loc_lly [lindex [$inst getLocation] 1]
 
   if {[string match "*gf14*" $name]||[string match "IN12LP*" $name]} {
-    set w [$master getWidth]
-    set h [$master getHeight]
+    set bbox [$inst getBBox]
+    set loc_lx [$bbox xMin]
+    set loc_ly [$bbox yMin]
+    set loc_ux [$bbox xMax]
+    set loc_uy [$bbox yMax]
 
-    set llx_Mx [expr $loc_llx - (128*$numTrack)] 
-    set lly_Mx [expr $loc_lly - (128*$numTrack)] 
-    set urx_Mx [expr $loc_llx + $w + (128*$numTrack)] 
-    set ury_Mx [expr $loc_lly + $h + (128*$numTrack)] 
+    foreach layer [$tech getLayers] {
+      if {[$layer getType] != "ROUTING"} {
+        continue
+      }
 
-    set llx_Cx $loc_llx 
-    set lly_Cx [expr $loc_lly - (160*$numTrack)] 
-    set urx_Cx [expr $loc_llx + $w] 
-    set ury_Cx [expr $loc_lly + $h + (160*$numTrack)] 
+      set name [$layer getName]
+      if {$name == "M2" || $name == "M3"} {
+        set lx [expr $loc_lx - (128*$numTrack)]
+        set ly [expr $loc_ly - (128*$numTrack)]
+        set ux [expr $loc_ux + (128*$numTrack)]
+        set uy [expr $loc_uy + (128*$numTrack)]
+      } elseif {$name == "C4"} {
+        set lx $loc_lx
+        set ly [expr $loc_ly - (160*$numTrack)]
+        set ux $loc_ux
+        set uy [expr $loc_uy + (160*$numTrack)]
+      } else {
+        set lx $loc_lx
+        set ly $loc_ly
+        set ux $loc_ux
+        set uy $loc_uy
+      }
+      odb::dbObstruction_create $block $layer $lx $ly $ux $uy
 
-    set obs_M2 [odb::dbObstruction_create $block $layer_M2 $llx_Mx $lly_Mx $urx_Mx $ury_Mx]
-    set obs_M3 [odb::dbObstruction_create $block $layer_M3 $llx_Mx $lly_Mx $urx_Mx $ury_Mx]
-    set obs_C4 [odb::dbObstruction_create $block $layer_C4 $llx_Cx $lly_Cx $urx_Cx $ury_Cx]
-
-    incr cnt
+      incr cnt
+    }
   }
 }
 
