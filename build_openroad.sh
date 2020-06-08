@@ -141,18 +141,18 @@ if [ "$build_method" == "DOCKER" ]; then
 # Local build
 elif [ "$build_method" == "LOCAL" ]; then
   mkdir -p tools/build/yosys
-  (cd tools/yosys && $NICE make install -j$PROC PREFIX=../build/yosys CONFIG=gcc TCL_VERSION=tcl8.5)
+  (cd tools/yosys && $NICE make install -j20 PREFIX=../build/yosys CONFIG=gcc TCL_VERSION=tcl8.5)
 
   mkdir -p tools/build/TritonRoute
-  (cd tools/build/TritonRoute && cmake ../../TritonRoute && $NICE make -j$PROC)
+  (cd tools/build/TritonRoute && cmake -DBOOST_ROOT=/home/tool/boost/boost_1_69_0/ ../../TritonRoute && $NICE make -j20)
 
   if [ -d flow/platforms/gf14 ]; then
     mkdir -p tools/build/TritonRoute14
-    (cd tools/build/TritonRoute14 && cmake ../../TritonRoute14 && $NICE make -j$PROC && mv TritonRoute TritonRoute14)
+    (cd tools/build/TritonRoute14 && cmake -DBOOST_ROOT=/home/tool/boost/boost_1_69_0/ ../../TritonRoute14 && $NICE make -j20 && mv TritonRoute TritonRoute14)
   fi
 
   mkdir -p tools/build/OpenROAD
-  (cd tools/build/OpenROAD && cmake ../../OpenROAD && $NICE make -j$PROC)
+  (cd tools/build/OpenROAD && cmake ../../OpenROAD && $NICE make -j20)
 else
   echo "ERROR: No valid build method found"
   exit 1
