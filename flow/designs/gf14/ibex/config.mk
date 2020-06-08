@@ -7,5 +7,5 @@ export VERILOG_FILES = ./designs/src/$(DESIGN_NICKNAME)/ibex_core.sv2v.v \
 export SDC_FILE      = ./designs/$(PLATFORM)/$(DESIGN_NICKNAME)/constraint.sdc
 
 # These values must be multiples of placement site
-export DIE_AREA    = 0 0 218.4 217.6
-export CORE_AREA   = 12.6 12.8 205.8 204.8
+export DIE_AREA    = 0 0 252 249.6
+export CORE_AREA   = 12.6 12.8 239.4 236.8
