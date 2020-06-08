@@ -87,14 +87,14 @@ puts "Repair tie lo fanout..."
 set tielo_cell_name [lindex $env(TIELO_CELL_AND_PORT) 0]
 set tielo_lib_name [get_name [get_property [get_lib_cell $tielo_cell_name] library]]
 set tielo_pin $tielo_lib_name/$tielo_cell_name/[lindex $env(TIELO_CELL_AND_PORT) 1]
-repair_tie_fanout -max_fanout $::env(MAX_FANOUT) $tielo_pin -separation 2
+repair_tie_fanout -separation 2 $tielo_pin
 
 # Repair tie hi fanout
 puts "Repair tie hi fanout..."
 set tiehi_cell_name [lindex $env(TIEHI_CELL_AND_PORT) 0]
 set tiehi_lib_name [get_name [get_property [get_lib_cell $tiehi_cell_name] library]]
 set tiehi_pin $tiehi_lib_name/$tiehi_cell_name/[lindex $env(TIEHI_CELL_AND_PORT) 1]
-repair_tie_fanout -max_fanout $::env(MAX_FANOUT) $tiehi_pin -separation 2
+repair_tie_fanout -separation 2 $tiehi_pin
 
 # Repair hold violations
 puts "Repair hold violations..."
