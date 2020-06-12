@@ -32,6 +32,11 @@ if {[info exists ::env(WIRE_RC_RES)] && [info exists ::env(WIRE_RC_CAP)]} {
   set_wire_rc -layer $::env(WIRE_RC_LAYER)
 }
 
+set buffer_lib_size medium
+if {[info exists ::env(BUFFER_LIB_SIZE)]} {
+  set buffer_lib_size $::env(BUFFER_LIB_SIZE)
+}
+
 # pre report
 log_begin $::env(REPORTS_DIR)/3_pre_resize.rpt
 
@@ -61,38 +66,27 @@ log_end
 set buffer_cell [get_lib_cell [lindex $::env(MIN_BUF_CELL_AND_PORTS) 0]]
 set_dont_use $::env(DONT_USE_CELLS)
 
-# Resize before buffer insertion
-puts "Perform resizing before buffer insertion..."
-resize
-
 # Do not buffer chip-level designs
 if {![info exists ::env(FOOTPRINT)]} {
   puts "Perform port buffering..."
   buffer_ports -buffer_cell $buffer_cell
 }
 
-# Repair max cap
-puts "Repair max cap..."
-repair_max_cap -buffer_cell $buffer_cell
+puts "Repair timing 1.."
+repair_timing -fast -capacitance_violations -transition_violations -negative_slack_violations -iterations 5 -auto_buffer_library $buffer_lib_size -upsize_enabled -pin_swap_enabled
 
-# Repair max slew
-puts "Repair max slew..."
-repair_max_slew -buffer_cell $buffer_cell
 
 # Repair max fanout
 puts "Repair max fanout..."
 set_max_fanout $::env(MAX_FANOUT) [current_design]
 repair_max_fanout -buffer_cell $buffer_cell
 
-# Perform resizing
-puts "Perform resizing after buffer insertion..."
-resize
-
 if { [info exists env(TIE_SEPARATION)] } {
   set tie_separation $env(TIE_SEPARATION)
 } else {
   set tie_separation 0
 }
+
 
 # Repair tie lo fanout
 puts "Repair tie lo fanout..."
@@ -108,9 +102,10 @@ set tiehi_lib_name [get_name [get_property [get_lib_cell $tiehi_cell_name] libra
 set tiehi_pin $tiehi_lib_name/$tiehi_cell_name/[lindex $env(TIEHI_CELL_AND_PORT) 1]
 repair_tie_fanout -separation $tie_separation $tiehi_pin
 
-# Repair hold violations
-puts "Repair hold violations..."
-repair_hold_violations -buffer_cell $buffer_cell
+puts "Repair timing 2.."
+repair_timing -fast -capacitance_violations -transition_violations -negative_slack_violations -iterations 3 -auto_buffer_library $buffer_lib_size -upsize_enabled -pin_swap_enabled
+
+
 
 # post report
 log_begin $::env(REPORTS_DIR)/3_post_resize.rpt

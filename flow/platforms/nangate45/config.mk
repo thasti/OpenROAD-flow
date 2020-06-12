@@ -88,3 +88,5 @@ export ABC_CLOCK_PERIOD_IN_PS ?= $(shell grep -E -o -m 1 "\-period\s+\S+" $(SDC_
 export ABC_DRIVER_CELL = BUF_X1
 # BUF_X1, pin (A) = 0.974659. Arbitrarily multiply by 4
 export ABC_LOAD_IN_FF = 3.898
+
+export BUFFER_LIB_SIZE = small
