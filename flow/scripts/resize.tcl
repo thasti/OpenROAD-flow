@@ -32,7 +32,7 @@ if {[info exists ::env(WIRE_RC_RES)] && [info exists ::env(WIRE_RC_CAP)]} {
   set_wire_rc -layer $::env(WIRE_RC_LAYER)
 }
 
-set buffer_lib_size medium
+set buffer_lib_size small
 if {[info exists ::env(BUFFER_LIB_SIZE)]} {
   set buffer_lib_size $::env(BUFFER_LIB_SIZE)
 }
