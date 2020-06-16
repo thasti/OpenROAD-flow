@@ -37,6 +37,11 @@ if {[info exists ::env(BUFFER_LIB_SIZE)]} {
   set buffer_lib_size $::env(BUFFER_LIB_SIZE)
 }
 
+set pessimism_factor 0.75
+if {[info exists ::env(TIMING_PESSIMISM_FACTOR)]} {
+  set pessimism_factor $::env(TIMING_PESSIMISM_FACTOR)
+}
+
 # pre report
 log_begin $::env(REPORTS_DIR)/3_pre_resize.rpt
 
@@ -72,8 +77,15 @@ if {![info exists ::env(FOOTPRINT)]} {
   buffer_ports -buffer_cell $buffer_cell
 }
 
+
+if { [info exists env(TIE_SEPARATION)] } {
+  set tie_separation $env(TIE_SEPARATION)
+} else {
+  set tie_separation 0
+}
+
 puts "Repair timing 1.."
-repair_timing -fast -capacitance_violations -transition_violations -negative_slack_violations -iterations 5 -auto_buffer_library $buffer_lib_size -upsize_enabled -pin_swap_enabled
+repair_timing -fast -capacitance_violations -transition_violations -negative_slack_violations -iterations 5 -auto_buffer_library $buffer_lib_size -upsize_enabled -pin_swap_enabled -pessimism_factor $pessimism_factor
 
 
 # Repair max fanout
@@ -102,10 +114,9 @@ set tiehi_lib_name [get_name [get_property [get_lib_cell $tiehi_cell_name] libra
 set tiehi_pin $tiehi_lib_name/$tiehi_cell_name/[lindex $env(TIEHI_CELL_AND_PORT) 1]
 repair_tie_fanout -separation $tie_separation $tiehi_pin
 
+# In case tie cells caused new violations
 puts "Repair timing 2.."
-repair_timing -fast -capacitance_violations -transition_violations -negative_slack_violations -iterations 3 -auto_buffer_library $buffer_lib_size -upsize_enabled -pin_swap_enabled
-
-
+repair_timing -fast -capacitance_violations -transition_violations -negative_slack_violations -iterations 3 -auto_buffer_library $buffer_lib_size -upsize_enabled -pin_swap_enabled -pessimism_factor $pessimism_factor
 
 # post report
 log_begin $::env(REPORTS_DIR)/3_post_resize.rpt

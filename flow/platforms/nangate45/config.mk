@@ -90,3 +90,4 @@ export ABC_DRIVER_CELL = BUF_X1
 export ABC_LOAD_IN_FF = 3.898
 
 export BUFFER_LIB_SIZE = small
+export TIMING_PESSIMISM_FACTOR = 0.75
