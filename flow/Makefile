@@ -263,17 +263,22 @@ place: $(RESULTS_DIR)/3_place.def \
 $(RESULTS_DIR)/3_1_place_gp.def: $(RESULTS_DIR)/2_floorplan.def $(RESULTS_DIR)/2_floorplan.sdc
 	($(TIME_CMD) $(OPENROAD_CMD) $(SCRIPTS_DIR)/global_place.tcl) 2>&1 | tee $(LOG_DIR)/3_1_place_gp.log
 
-# STEP 2: Resizing & Buffering
+# STEP 2: Detailed placement
 #-------------------------------------------------------------------------------
-$(RESULTS_DIR)/3_2_place_resized.def: $(RESULTS_DIR)/3_1_place_gp.def $(RESULTS_DIR)/2_floorplan.sdc
-	($(TIME_CMD) $(OPENROAD_CMD) $(SCRIPTS_DIR)/resize.tcl) 2>&1 | tee $(LOG_DIR)/3_2_resizer.log
+$(RESULTS_DIR)/3_2_place_dp.def: $(RESULTS_DIR)/3_1_place_gp.def
+	($(TIME_CMD) $(OPENROAD_CMD) $(SCRIPTS_DIR)/detail_place.tcl) 2>&1 | tee $(LOG_DIR)/3_2_opendp.log
 
-# STEP 3: Detail placement
+# STEP 3: Repair Timing Violation
 #-------------------------------------------------------------------------------
-$(RESULTS_DIR)/3_3_place_dp.def: $(RESULTS_DIR)/3_2_place_resized.def
-	($(TIME_CMD) $(OPENROAD_CMD) $(SCRIPTS_DIR)/detail_place.tcl) 2>&1 | tee $(LOG_DIR)/3_3_opendp.log
+$(RESULTS_DIR)/3_3_place_repaired.def: $(RESULTS_DIR)/3_2_place_dp.def $(RESULTS_DIR)/2_floorplan.sdc
+	($(TIME_CMD) $(OPENROAD_CMD) $(SCRIPTS_DIR)/repair_timing.tcl) 2>&1 | tee $(LOG_DIR)/3_3_place_repaired.log
 
-$(RESULTS_DIR)/3_place.def: $(RESULTS_DIR)/3_3_place_dp.def
+# STEP 4: Legalize
+#-------------------------------------------------------------------------------
+$(RESULTS_DIR)/3_4_place_legalized.def: $(RESULTS_DIR)/3_3_place_repaired.def
+	($(TIME_CMD) $(OPENROAD_CMD) $(SCRIPTS_DIR)/legalize.tcl) 2>&1 | tee $(LOG_DIR)/3_4_opendp_legalize.log
+
+$(RESULTS_DIR)/3_place.def: $(RESULTS_DIR)/3_4_place_legalized.def
 	cp $< $@
 
 $(RESULTS_DIR)/3_place.sdc: $(RESULTS_DIR)/2_floorplan.sdc

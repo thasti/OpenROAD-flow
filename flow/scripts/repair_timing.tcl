@@ -15,7 +15,7 @@ if {![info exists standalone] || $standalone} {
   }
 
   # Read def and sdc
-  read_def $::env(RESULTS_DIR)/3_1_place_gp.def
+  read_def $::env(RESULTS_DIR)/3_2_place_dp.def
   read_sdc $::env(RESULTS_DIR)/2_floorplan.sdc
 }
 
@@ -43,10 +43,13 @@ if {[info exists ::env(TIMING_PESSIMISM_FACTOR)]} {
 }
 
 # pre report
-log_begin $::env(REPORTS_DIR)/3_pre_resize.rpt
+log_begin $::env(REPORTS_DIR)/3_pre_timing_repair.rpt
 
 print_banner "report_checks"
 report_checks
+
+print_banner "report_slew_violations"
+report_check_types -max_slew -max_capacitance -max_fanout -violators
 
 print_banner "report_tns"
 report_tns
@@ -84,7 +87,7 @@ if { [info exists env(TIE_SEPARATION)] } {
   set tie_separation 0
 }
 
-puts "Repair timing 1.."
+puts "Repair timing \[1\]"
 repair_timing -fast -capacitance_violations -transition_violations -negative_slack_violations -iterations 5 -auto_buffer_library $buffer_lib_size -upsize_enabled -pin_swap_enabled -pessimism_factor $pessimism_factor
 
 
@@ -115,11 +118,11 @@ set tiehi_pin $tiehi_lib_name/$tiehi_cell_name/[lindex $env(TIEHI_CELL_AND_PORT)
 repair_tie_fanout -separation $tie_separation $tiehi_pin
 
 # In case tie cells caused new violations
-puts "Repair timing 2.."
-repair_timing -fast -capacitance_violations -transition_violations -negative_slack_violations -iterations 3 -auto_buffer_library $buffer_lib_size -upsize_enabled -pin_swap_enabled -pessimism_factor $pessimism_factor
+puts "Repair timing \[2\]"
+repair_timing -fast -capacitance_violations -transition_violations -negative_slack_violations -iterations 1 -auto_buffer_library $buffer_lib_size -upsize_enabled -pin_swap_enabled -pessimism_factor $pessimism_factor
 
 # post report
-log_begin $::env(REPORTS_DIR)/3_post_resize.rpt
+log_begin $::env(REPORTS_DIR)/3_post_timing_repair.rpt
 
 print_banner "report_floating_nets"
 report_floating_nets
@@ -152,6 +155,6 @@ puts ""
 log_end
 
 if {![info exists standalone] || $standalone} {
-  write_def $::env(RESULTS_DIR)/3_2_place_resized.def
+  write_def $::env(RESULTS_DIR)/3_3_place_repaired.def
   exit
 }
