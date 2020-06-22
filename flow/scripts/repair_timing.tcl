@@ -25,8 +25,6 @@ proc print_banner {header} {
   puts "--------------------------------------------------------------------------"
 }
 
-set fast_timing_repair [info exists ::env(FAST_TIMING_REPAIR)]
-
 # Set res and cap
 if {[info exists ::env(WIRE_RC_RES)] && [info exists ::env(WIRE_RC_CAP)]} {
   set_wire_rc -res $::env(WIRE_RC_RES) -cap $::env(WIRE_RC_CAP)
@@ -50,14 +48,14 @@ log_begin $::env(REPORTS_DIR)/3_pre_timing_repair.rpt
 print_banner "report_checks"
 report_checks
 
-print_banner "report_slew_violations"
-report_check_types -max_slew -max_capacitance -max_fanout -violators
-
 print_banner "report_tns"
 report_tns
 
 print_banner "report_wns"
 report_wns
+
+print_banner "report_slew_violations"
+report_check_types -max_slew -max_capacitance -max_fanout -violators
 
 print_banner "report_design_area"
 report_design_area
@@ -76,34 +74,74 @@ log_end
 set buffer_cell [get_lib_cell [lindex $::env(MIN_BUF_CELL_AND_PORTS) 0]]
 set_dont_use $::env(DONT_USE_CELLS)
 
-
-if { [info exists env(TIE_SEPARATION)] } {
-  set tie_separation $env(TIE_SEPARATION)
-} else {
-  set tie_separation 0
+# Do not buffer chip-level designs
+if {![info exists ::env(FOOTPRINT)]} {
+  puts "Perform port buffering..."
+  buffer_ports -buffer_cell $buffer_cell
 }
 
-if {$fast_timing_repair} {
-  puts "Using fast timing repair"
-  #puts "Repair long wires..."
-  #repair_long_wires -buffer_cell $buffer_cell
-  # Resize before buffer insertion
-  puts "Perform resizing before buffer insertion..."
-  resize
-
+set fast_timing_repair [info exists ::env(FAST_TIMING_REPAIR)]
+if {!$fast_timing_repair} {
+  puts "Using high-effort timing repair"
   # Do not buffer chip-level designs
   if {![info exists ::env(FOOTPRINT)]} {
     puts "Perform port buffering..."
     buffer_ports -buffer_cell $buffer_cell
   }
 
-  # Repair max cap
-  puts "Repair max cap..."
-  repair_max_cap -buffer_cell $buffer_cell
+  puts "Repair timing \[1\]"
+  repair_timing -iterations 5 -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
 
-  # Repair max slew
-  puts "Repair max slew..."
-  repair_max_slew -buffer_cell $buffer_cell
+
+  # Repair max fanout
+  puts "Repair max fanout..."
+  set_max_fanout $::env(MAX_FANOUT) [current_design]
+  repair_max_fanout -buffer_cell $buffer_cell
+
+  if { [info exists env(TIE_SEPARATION)] } {
+    set tie_separation $env(TIE_SEPARATION)
+  } else {
+    set tie_separation 0
+  }
+
+
+  # Repair tie lo fanout
+  puts "Repair tie lo fanout..."
+  set tielo_cell_name [lindex $env(TIELO_CELL_AND_PORT) 0]
+  set tielo_lib_name [get_name [get_property [get_lib_cell $tielo_cell_name] library]]
+  set tielo_pin $tielo_lib_name/$tielo_cell_name/[lindex $env(TIELO_CELL_AND_PORT) 1]
+  repair_tie_fanout -separation $tie_separation $tielo_pin
+
+  # Repair tie hi fanout
+  puts "Repair tie hi fanout..."
+  set tiehi_cell_name [lindex $env(TIEHI_CELL_AND_PORT) 0]
+  set tiehi_lib_name [get_name [get_property [get_lib_cell $tiehi_cell_name] library]]
+  set tiehi_pin $tiehi_lib_name/$tiehi_cell_name/[lindex $env(TIEHI_CELL_AND_PORT) 1]
+  repair_tie_fanout -separation $tie_separation $tiehi_pin
+
+  # In case tie cells caused new violations
+  puts "Repair timing \[2\]"
+  repair_timing -iterations 1 -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
+
+} else {
+  puts "Using fast timing repair"
+  set repair_wires 1
+  if { $repair_wires } {
+    puts "Repair long wires..."
+    repair_long_wires -max_length $::env(MAX_WIRE_LENGTH) -buffer_cell $buffer_cell
+  } else {
+    # Resize before buffer insertion
+    puts "Perform resizing before buffer insertion..."
+    resize
+    
+    # Repair max cap
+    puts "Repair max cap..."
+    repair_max_cap -buffer_cell $buffer_cell
+    
+    # Repair max slew
+    puts "Repair max slew..."
+    repair_max_slew -buffer_cell $buffer_cell
+  }
 
   # Repair max fanout
   puts "Repair max fanout..."
@@ -137,48 +175,6 @@ if {$fast_timing_repair} {
   # Repair hold violations
   puts "Repair hold violations..."
   repair_hold_violations -buffer_cell $buffer_cell
-
-} else {
-  puts "Using high-effort timing repair"
-  # Do not buffer chip-level designs
-  if {![info exists ::env(FOOTPRINT)]} {
-    puts "Perform port buffering..."
-    buffer_ports -buffer_cell $buffer_cell
-  }
-
-  puts "Repair timing \[1\]"
-  repair_timing -iterations 5 -auto_buffer_library $buffer_lib_size -pessimism_factor $pessimism_factor
-
-
-  # Repair max fanout
-  puts "Repair max fanout..."
-  set_max_fanout $::env(MAX_FANOUT) [current_design]
-  repair_max_fanout -buffer_cell $buffer_cell
-
-  if { [info exists env(TIE_SEPARATION)] } {
-    set tie_separation $env(TIE_SEPARATION)
-  } else {
-    set tie_separation 0
-  }
-
-
-  # Repair tie lo fanout
-  puts "Repair tie lo fanout..."
-  set tielo_cell_name [lindex $env(TIELO_CELL_AND_PORT) 0]
-  set tielo_lib_name [get_name [get_property [get_lib_cell $tielo_cell_name] library]]
-  set tielo_pin $tielo_lib_name/$tielo_cell_name/[lindex $env(TIELO_CELL_AND_PORT) 1]
-  repair_tie_fanout -separation $tie_separation $tielo_pin
-
-  # Repair tie hi fanout
-  puts "Repair tie hi fanout..."
-  set tiehi_cell_name [lindex $env(TIEHI_CELL_AND_PORT) 0]
-  set tiehi_lib_name [get_name [get_property [get_lib_cell $tiehi_cell_name] library]]
-  set tiehi_pin $tiehi_lib_name/$tiehi_cell_name/[lindex $env(TIEHI_CELL_AND_PORT) 1]
-  repair_tie_fanout -separation $tie_separation $tiehi_pin
-
-  # In case tie cells caused new violations
-  puts "Repair timing \[2\]"
-  repair_timing -iterations 1 -auto_buffer_library $buffer_lib_size -pessimism_factor $pessimism_factor
 
 }
 
