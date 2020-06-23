@@ -75,10 +75,13 @@ include ./platforms/$(PLATFORM)/config.mk
 # Setup working directories
 export DESIGN_NICKNAME ?= $(DESIGN_NAME)
 
-export LOG_DIR     = ./logs/$(PLATFORM)/$(DESIGN_NICKNAME)
-export OBJECTS_DIR = ./objects/$(PLATFORM)/$(DESIGN_NICKNAME)
-export REPORTS_DIR = ./reports/$(PLATFORM)/$(DESIGN_NICKNAME)
-export RESULTS_DIR = ./results/$(PLATFORM)/$(DESIGN_NICKNAME)
+export FLOW_SUFFIX ?=
+
+export LOG_DIR     = ./logs/$(PLATFORM)$(FLOW_SUFFIX)/$(DESIGN_NICKNAME)
+export OBJECTS_DIR = ./objects/$(PLATFORM)$(FLOW_SUFFIX)/$(DESIGN_NICKNAME)
+export REPORTS_DIR = ./reports/$(PLATFORM)$(FLOW_SUFFIX)/$(DESIGN_NICKNAME)
+export RESULTS_DIR = ./results/$(PLATFORM)$(FLOW_SUFFIX)/$(DESIGN_NICKNAME)
+
 
 export SCRIPTS_DIR = ./scripts
 export UTILS_DIR   = ./util
@@ -339,7 +342,8 @@ clean_cts:
 # |_| \_\\___/ \___/  |_| |___|_| \_|\____|
 #
 route: $(RESULTS_DIR)/5_route.def \
-       $(RESULTS_DIR)/5_route.sdc
+       $(RESULTS_DIR)/5_route.sdc \
+	   $(REPORTS_DIR)/5_route_report.rpt
 # ==============================================================================
 
 
@@ -389,6 +393,10 @@ endif
 
 $(RESULTS_DIR)/5_route.sdc: $(RESULTS_DIR)/4_cts.sdc
 	cp $< $@
+
+$(REPORTS_DIR)/5_route_report.rpt: $(RESULTS_DIR)/5_route.def $(RESULTS_DIR)/5_route.sdc
+	($(TIME_CMD) $(OPENROAD_CMD) $(SCRIPTS_DIR)/final_report.tcl) 2>&1 | tee $(LOG_DIR)/5_route_report.log
+
 
 clean_route:
 	rm -rf output*/ results*.out.dmp layer_*.mps

@@ -68,6 +68,11 @@ puts [sta::network_leaf_pin_count]
 
 puts ""
 
+puts "pre_repair_slew_vio: [llength [string trim [psn::transition_violations]]]"
+puts "pre_repair_cap_vio: [llength [string trim [psn::capacitance_violations]]]"
+puts "pre_repair_inst_count: [sta::network_leaf_instance_count]"
+puts "pre_repair_pin_count: [sta::network_leaf_pin_count]"
+
 log_end
 
 # Set the buffer cell
@@ -208,6 +213,12 @@ print_banner "pin_count"
 puts [sta::network_leaf_pin_count]
 
 puts ""
+
+
+puts "post_repair_slew_vio: [llength [string trim [psn::transition_violations]]]"
+puts "post_repair_cap_vio: [llength [string trim [psn::capacitance_violations]]]"
+puts "post_repair_inst_count: [sta::network_leaf_instance_count]"
+puts "post_repair_pin_count: [sta::network_leaf_pin_count]"
 
 log_end
 

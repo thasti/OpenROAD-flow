@@ -55,7 +55,7 @@ puts "--------------------------------------------------------------------------
 report_wns
 
 puts "\n=========================================================================="
-puts "report_check_types -max_slew -violators"
+puts "report_check_types -max_slew -max_capacitance -max_fanout -violators"
 puts "--------------------------------------------------------------------------"
 report_check_types -max_slew -max_capacitance -max_fanout -violators
 
@@ -84,6 +84,11 @@ puts "pin_count"
 puts "--------------------------------------------------------------------------"
 puts "[sta::network_leaf_pin_count]"
 
+
+puts "final_slew_vio: [llength [string trim [psn::transition_violations]]]"
+puts "final_cap_vio: [llength [string trim [psn::capacitance_violations]]]"
+puts "final_inst_count: [sta::network_leaf_instance_count]"
+puts "final_pin_count: [sta::network_leaf_pin_count]"
 log_end
 
 # Delete routing obstructions for final DEF
