@@ -27,7 +27,9 @@ check_placement -verbose
 
 
 # Set res and cap
-if {[info exists ::env(WIRE_RC_RES)] && [info exists ::env(WIRE_RC_CAP)]} {
+if [file exists platforms/$::env(PLATFORM)/setRC.tcl] {
+  source platforms/$::env(PLATFORM)/setRC.tcl
+} elseif {[info exists ::env(WIRE_RC_RES)] && [info exists ::env(WIRE_RC_CAP)]} {
   set_wire_rc -res $::env(WIRE_RC_RES) -cap $::env(WIRE_RC_CAP)
 } else {
   set_wire_rc -layer $::env(WIRE_RC_LAYER)
