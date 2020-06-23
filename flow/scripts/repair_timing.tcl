@@ -26,9 +26,7 @@ proc print_banner {header} {
 }
 
 # Set res and cap
-if [file exists platforms/$::env(PLATFORM)/setRC.tcl] {
-  source platforms/$::env(PLATFORM)/setRC.tcl
-} elseif {[info exists ::env(WIRE_RC_RES)] && [info exists ::env(WIRE_RC_CAP)]} {
+if {[info exists ::env(WIRE_RC_RES)] && [info exists ::env(WIRE_RC_CAP)]} {
   set_wire_rc -res $::env(WIRE_RC_RES) -cap $::env(WIRE_RC_CAP)
 } else {
   set_wire_rc -layer $::env(WIRE_RC_LAYER)
@@ -84,7 +82,7 @@ set_dont_use $::env(DONT_USE_CELLS)
 # Do not buffer chip-level designs
 if {![info exists ::env(FOOTPRINT)]} {
   puts "Perform port buffering..."
-  buffer_ports -buffer_cell $buffer_cell
+  # buffer_ports -buffer_cell $buffer_cell
 }
 
 set fast_timing_repair [info exists ::env(FAST_TIMING_REPAIR)]
@@ -132,28 +130,10 @@ if {!$fast_timing_repair} {
 
 } else {
   puts "Using fast timing repair"
-  set repair_wires 1
-  if { $repair_wires } {
-    puts "Repair long wires..."
-    repair_long_wires -max_length $::env(MAX_WIRE_LENGTH) -buffer_cell $buffer_cell
-  } else {
-    # Resize before buffer insertion
-    puts "Perform resizing before buffer insertion..."
-    resize
-    
-    # Repair max cap
-    puts "Repair max cap..."
-    repair_max_cap -buffer_cell $buffer_cell
-    
-    # Repair max slew
-    puts "Repair max slew..."
-    repair_max_slew -buffer_cell $buffer_cell
-  }
-
-  # Repair max fanout
-  puts "Repair max fanout..."
   set_max_fanout $::env(MAX_FANOUT) [current_design]
-  repair_max_fanout -buffer_cell $buffer_cell
+
+  puts "Repair design..."
+  repair_design -max_wire_length $::env(MAX_WIRE_LENGTH) -buffer_cell $buffer_cell
 
   # Perform resizing
   puts "Perform resizing after buffer insertion..."
