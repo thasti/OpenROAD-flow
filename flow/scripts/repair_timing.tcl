@@ -110,8 +110,8 @@ if {!$fast_timing_repair} {
   if {[info exists ::env(TIMING_REPAIR_NEGATIVE_SLACK_PATH_DEPTH)]} {
     set maximum_negative_slack_path_depth $::env(TIMING_REPAIR_NEGATIVE_SLACK_PATH_DEPTH)
   }
-  set repair_ns_args "-maximum_negative_slack_path_depth $maximum_negative_slack_path_depth"
-
+  set repair_ns_args "$repair_ns_args -maximum_negative_slack_path_depth $maximum_negative_slack_path_depth"
+  
   puts "Repair timing \[1\]"
   repair_timing -iterations $repair_timing_1_iterations {*}$repair_ns_args -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
 
