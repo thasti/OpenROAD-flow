@@ -41,6 +41,14 @@ set pessimism_factor 0.75
 if {[info exists ::env(TIMING_PESSIMISM_FACTOR)]} {
   set pessimism_factor $::env(TIMING_PESSIMISM_FACTOR)
 }
+set repair_timing_1_iterations 7
+if {[info exists ::env(REPAIR_TIMING_MAJOR_MAX_ITERATION)]} {
+  set repair_timing_1_iterations $::env(REPAIR_TIMING_MAJOR_MAX_ITERATION)
+}
+set repair_timing_2_iterations 3
+if {[info exists ::env(REPAIR_TIMING_MINOR_MAX_ITERATION)]} {
+  set repair_timing_2_iterations $::env(REPAIR_TIMING_MINOR_MAX_ITERATION)
+}
 
 # pre report
 log_begin $::env(REPORTS_DIR)/3_pre_timing_repair.rpt
@@ -95,7 +103,7 @@ if {!$fast_timing_repair} {
   }
 
   puts "Repair timing \[1\]"
-  repair_timing -iterations 5 -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
+  repair_timing -iterations $repair_timing_1_iterations -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
 
 
   # Repair max fanout
@@ -126,7 +134,7 @@ if {!$fast_timing_repair} {
 
   # In case tie cells caused new violations
   puts "Repair timing \[2\]"
-  repair_timing -iterations 1 -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
+  repair_timing -iterations $repair_timing_2_iterations -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
 
 } else {
   puts "Using fast timing repair"
