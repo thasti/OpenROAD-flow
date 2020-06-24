@@ -92,5 +92,5 @@ export ABC_DRIVER_CELL = BUF_X1
 # BUF_X1, pin (A) = 0.974659. Arbitrarily multiply by 4
 export ABC_LOAD_IN_FF = 3.898
 
-export BUFFER_LIB_SIZE = small
-export TIMING_PESSIMISM_FACTOR = 0.75
+export TIMING_REPAIR_BUFFER_LIB_SIZE = small
+export TIMING_REPAIR_PESSIMISM_FACTOR = 0.75

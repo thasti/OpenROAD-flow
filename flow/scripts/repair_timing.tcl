@@ -33,21 +33,21 @@ if {[info exists ::env(WIRE_RC_RES)] && [info exists ::env(WIRE_RC_CAP)]} {
 }
 
 set buffer_lib_size small
-if {[info exists ::env(BUFFER_LIB_SIZE)]} {
-  set buffer_lib_size $::env(BUFFER_LIB_SIZE)
+if {[info exists ::env(TIMING_REPAIR_BUFFER_LIB_SIZE)]} {
+  set buffer_lib_size $::env(TIMING_REPAIR_BUFFER_LIB_SIZE)
 }
 
 set pessimism_factor 0.75
-if {[info exists ::env(TIMING_PESSIMISM_FACTOR)]} {
-  set pessimism_factor $::env(TIMING_PESSIMISM_FACTOR)
+if {[info exists ::env(TIMING_REPAIR_PESSIMISM_FACTOR)]} {
+  set pessimism_factor $::env(TIMING_REPAIR_PESSIMISM_FACTOR)
 }
 set repair_timing_1_iterations 7
-if {[info exists ::env(REPAIR_TIMING_MAJOR_MAX_ITERATION)]} {
-  set repair_timing_1_iterations $::env(REPAIR_TIMING_MAJOR_MAX_ITERATION)
+if {[info exists ::env(TIMING_REPAIR_MAJOR_MAX_ITERATION)]} {
+  set repair_timing_1_iterations $::env(TIMING_REPAIR_MAJOR_MAX_ITERATION)
 }
 set repair_timing_2_iterations 3
-if {[info exists ::env(REPAIR_TIMING_MINOR_MAX_ITERATION)]} {
-  set repair_timing_2_iterations $::env(REPAIR_TIMING_MINOR_MAX_ITERATION)
+if {[info exists ::env(TIMING_REPAIR_MINOR_MAX_ITERATION)]} {
+  set repair_timing_2_iterations $::env(TIMING_REPAIR_MINOR_MAX_ITERATION)
 }
 
 # pre report
@@ -93,7 +93,7 @@ if {![info exists ::env(FOOTPRINT)]} {
   # buffer_ports -buffer_cell $buffer_cell
 }
 
-set fast_timing_repair [info exists ::env(FAST_TIMING_REPAIR)]
+set fast_timing_repair [info exists ::env(TIMING_REPAIR_FAST)]
 if {!$fast_timing_repair} {
   puts "Using high-effort timing repair"
   # Do not buffer chip-level designs
@@ -101,9 +101,19 @@ if {!$fast_timing_repair} {
     puts "Perform port buffering..."
     buffer_ports -buffer_cell $buffer_cell
   }
+  set maximum_negative_slack_path_depth 20
+  set repair_ns_args ""
+  if {![info exists ::env(TIMING_REPAIR_MAXIMUM_EFFORT)]} {
+    set repair_ns_args "-no_resize_for_negative_slack"
+    set maximum_negative_slack_path_depth 20
+  }
+  if {[info exists ::env(TIMING_REPAIR_NEGATIVE_SLACK_PATH_DEPTH)]} {
+    set maximum_negative_slack_path_depth $::env(TIMING_REPAIR_NEGATIVE_SLACK_PATH_DEPTH)
+  }
+  set repair_ns_args "-maximum_negative_slack_path_depth $maximum_negative_slack_path_depth"
 
   puts "Repair timing \[1\]"
-  repair_timing -iterations $repair_timing_1_iterations -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
+  repair_timing -iterations $repair_timing_1_iterations {*}$repair_ns_args -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
 
 
   # Repair max fanout
@@ -134,7 +144,7 @@ if {!$fast_timing_repair} {
 
   # In case tie cells caused new violations
   puts "Repair timing \[2\]"
-  repair_timing -iterations $repair_timing_2_iterations -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
+  repair_timing -iterations $repair_timing_2_iterations {*}$repair_ns_args -auto_buffer_library $buffer_lib_size -capacitance_pessimism_factor $pessimism_factor -transition_pessimism_factor $pessimism_factor
 
 } else {
   puts "Using fast timing repair"
