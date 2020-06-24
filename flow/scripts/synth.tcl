@@ -68,9 +68,9 @@ close $constr
 
 # Technology mapping for cells
 if {[info exist ::env(ABC_CLOCK_PERIOD_IN_PS)]} {
-  abc -D [expr $::env(ABC_CLOCK_PERIOD_IN_PS)] \
-      -liberty $::env(OBJECTS_DIR)/merged.lib \
+  abc -liberty $::env(OBJECTS_DIR)/merged.lib \
       -constr $::env(OBJECTS_DIR)/abc.constr
+      # -D [expr $::env(ABC_CLOCK_PERIOD_IN_PS)] \
 } else {
   puts "WARNING: No clock period constraints detected in design"
   abc -liberty $::env(OBJECTS_DIR)/merged.lib \

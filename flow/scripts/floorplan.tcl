@@ -73,6 +73,11 @@ if {[info exists ::env(MACRO_WRAPPERS)]} {
   }
 }
 
+if {[info exist ::env(EARLY_FANOUT_REPAIR)]} {
+  puts "Optimize fanout..."
+  optimize_fanout -buffer_cell [lindex $::env(MIN_BUF_CELL_AND_PORTS) 0] -max_fanout $::env(MAX_FANOUT)
+}
+
 # pre report
 log_begin $::env(REPORTS_DIR)/2_init.rpt
 
