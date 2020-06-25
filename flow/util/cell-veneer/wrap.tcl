@@ -1,6 +1,6 @@
 #!/bin/sh
 # the next line restarts using tclsh \
-exec tclsh "$0" ${1+"$@"}
+exec /bin/tclsh "$0" ${1+"$@"}
 
 package require wrapper
 package require lefdef
