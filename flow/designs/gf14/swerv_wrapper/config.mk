@@ -22,3 +22,8 @@ export DIE_AREA    = 0 0 970.2 760.896
 export CORE_AREA   = 9.996 20.16 960.036 749.952
 
 export PLACE_DENSITY = 0.25
+
+export MACRO_WRAPPERS = ./designs/$(PLATFORM)/$(DESIGN_NAME)/wrappers.tcl
+
+# TODO: replace this with max(CHANNEL_WIDTH_[HV]) from IP_global.cfg
+export MACRO_BLOCKAGE_HALO = 25
