@@ -13,15 +13,12 @@ if {![info exists standalone] || $standalone} {
     read_liberty $libFile
   }
   
-  if {[info exist ::env(ADDITIONAL_LIBS)]} {
-    foreach libFile $::env(ADDITIONAL_LIBS) {
-      read_liberty $libFile
-    }
-  }
-
   # Read design files
   read_def $::env(RESULTS_DIR)/2_3_floorplan_tdms.def
   read_sdc $::env(RESULTS_DIR)/1_synth.sdc
+  if [file exists platforms/$::env(PLATFORM)/derate.tcl] {
+    source platforms/$::env(PLATFORM)/derate.tcl
+  }
 }
 
 proc find_macros {} {
@@ -42,7 +39,18 @@ proc find_macros {} {
 
 
 if {[find_macros] != ""} {
-  macro_placement -global_config $::env(IP_GLOBAL_CFG)
+  if {[info exists ::env(MACRO_PLACEMENT)]} {
+    source scripts/read_macro_placement.tcl
+    puts "\[INFO\]\[FLOW-xxxx\] Using manual macro placement file $::env(MACRO_PLACEMENT)"
+    read_macro_placement $::env(MACRO_PLACEMENT)
+  } else {
+    macro_placement -global_config $::env(IP_GLOBAL_CFG)
+  }
+
+  if {[info exists ::env(MACRO_BLOCKAGE_HALO)]} {
+    source scripts/placement_blockages.tcl
+    block_channels $::env(MACRO_BLOCKAGE_HALO)
+  }
 } else {
   puts "No macros found: Skipping macro_placement"
 }

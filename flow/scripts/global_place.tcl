@@ -16,11 +16,21 @@ if {![info exists standalone] || $standalone} {
   # Read design files
   read_def $::env(RESULTS_DIR)/2_floorplan.def
   read_sdc $::env(RESULTS_DIR)/2_floorplan.sdc
+  if [file exists platforms/$::env(PLATFORM)/derate.tcl] {
+    source platforms/$::env(PLATFORM)/derate.tcl
+  }
 }
 
-set_wire_rc -layer $::env(WIRE_RC_LAYER)
-
-global_placement -timing_driven -density $::env(PLACE_DENSITY)
+if { 0 != [llength [array get ::env GLOBAL_PLACEMENT_ARGS]] } {
+global_placement -disable_routability_driven -density $::env(PLACE_DENSITY) \
+    -pad_left $::env(CELL_PAD_IN_SITES_GLOBAL_PLACEMENT) \
+    -pad_right $::env(CELL_PAD_IN_SITES_GLOBAL_PLACEMENT) \
+    $::env(GLOBAL_PLACEMENT_ARGS)
+} else {
+global_placement -disable_routability_driven -density $::env(PLACE_DENSITY) \
+    -pad_left $::env(CELL_PAD_IN_SITES_GLOBAL_PLACEMENT) \
+    -pad_right $::env(CELL_PAD_IN_SITES_GLOBAL_PLACEMENT)
+}
 
 if {![info exists standalone] || $standalone} {
   write_def $::env(RESULTS_DIR)/3_1_place_gp.def

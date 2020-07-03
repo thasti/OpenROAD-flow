@@ -18,13 +18,10 @@ if {![info exists standalone] || $standalone} {
 
   # Read SDC file
   read_sdc $::env(RESULTS_DIR)/3_place.sdc
+  if [file exists platforms/$::env(PLATFORM)/derate.tcl] {
+    source platforms/$::env(PLATFORM)/derate.tcl
+  }
 }
-
-# Report timing before CTS
-puts "\n=========================================================================="
-puts "report_checks"
-puts "--------------------------------------------------------------------------"
-report_checks
 
 # Run CTS
 clock_tree_synthesis -lut_file "$::env(CTS_TECH_DIR)/lut.txt" \
@@ -32,13 +29,18 @@ clock_tree_synthesis -lut_file "$::env(CTS_TECH_DIR)/lut.txt" \
                      -root_buf "$::env(CTS_BUF_CELL)" \
                      -wire_unit 20
 
-set_placement_padding -global -left 0 -right $::env(CELL_PAD_IN_SITES)
+set buffer_cell [get_lib_cell [lindex $::env(MIN_BUF_CELL_AND_PORTS) 0]]
+repair_clock_nets -max_wire_length $::env(MAX_WIRE_LENGTH) -buffer_cell $buffer_cell
+
+set_placement_padding -global \
+    -left $::env(CELL_PAD_IN_SITES_DETAIL_PLACEMENT) \
+    -right $::env(CELL_PAD_IN_SITES_DETAIL_PLACEMENT)
 detailed_placement
 check_placement
 
 if {![info exists standalone] || $standalone} {
   # write output
-  write_def $::env(RESULTS_DIR)/4_1_cts_prefillcell.def
+  write_def $::env(RESULTS_DIR)/4_1_cts.def
   write_verilog $::env(RESULTS_DIR)/4_cts.v
   write_sdc $::env(RESULTS_DIR)/4_cts.sdc
   exit

@@ -1,9 +1,0 @@
-{
-    "rules": [
-        {
-            "field" : "droute_viols",
-            "value" : 6,
-            "compare": "<="
-        }
-    ]
-}
